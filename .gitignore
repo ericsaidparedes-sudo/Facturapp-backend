@@ -1,0 +1,10 @@
+# Datos de conexión reales (contienen la contraseña).
+.env
+
+# Entorno virtual de Python: cada persona lo crea en su equipo.
+.venv/
+
+# Archivos que Python genera solo.
+__pycache__/
+*.pyc
+.pytest_cache/

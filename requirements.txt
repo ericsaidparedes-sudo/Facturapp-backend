@@ -1,0 +1,23 @@
+# Librerías del mini CRUD, con su versión exacta para que todos instalen las mismas.
+# Se instalan con:
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# FastAPI: el framework para crear la API (los endpoints).
+fastapi==0.165.0
+
+# Uvicorn: el servidor que pone a funcionar la API en un puerto.
+uvicorn==0.54.0
+
+# PyMySQL: conecta Python con MySQL.
+pymysql==1.2.4
+
+# python-dotenv: lee el archivo .env con los datos de conexión.
+python-dotenv==1.2.4
+
+# ---- Solo para las pruebas automáticas (test_usuarios.py) ----
+
+# pytest: ejecuta las pruebas automáticas.
+pytest==9.2.0
+
+# httpx2: lo usa el TestClient de FastAPI para enviar peticiones a la API.
+httpx2==2.16.2

@@ -1,0 +1,145 @@
+{
+  "info": {
+    "name": "Mini CRUD de usuarios",
+    "description": "Las 9 peticiones de la demostración, en orden. Ejecutar con el servidor encendido (uvicorn en el puerto 8000) y MySQL encendido.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "usuario_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Salud del servidor",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 200 OK\", function () {",
+        "    pm.response.to.have.status(200);",
+        "});",
+        "",
+        "pm.test(\"El estado es ok\", function () {",
+        "    pm.expect(pm.response.json().estado).to.eql(\"ok\");",
+        "});"
+      ] } }],
+      "request": { "method": "GET", "url": "{{base_url}}/salud" }
+    },
+    {
+      "name": "2. Listar usuarios",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 200 OK\", function () {",
+        "    pm.response.to.have.status(200);",
+        "});",
+        "",
+        "pm.test(\"Devuelve una lista\", function () {",
+        "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+        "});"
+      ] } }],
+      "request": { "method": "GET", "url": "{{base_url}}/usuarios" }
+    },
+    {
+      "name": "3. Crear usuario",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 201 Created\", function () {",
+        "    pm.response.to.have.status(201);",
+        "});",
+        "",
+        "// Guarda el id del usuario nuevo para las peticiones 4, 5, 8 y 9.",
+        "const usuario = pm.response.json();",
+        "pm.test(\"Devuelve el usuario con su id\", function () {",
+        "    pm.expect(usuario.id).to.be.a(\"number\");",
+        "});",
+        "pm.collectionVariables.set(\"usuario_id\", usuario.id);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n    \"nombre\": \"Carlos Pérez\",\n    \"correo\": \"carlos.perez.{{$timestamp}}@ejemplo.test\"\n}" },
+        "url": "{{base_url}}/usuarios"
+      }
+    },
+    {
+      "name": "4. Ver un usuario",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 200 OK\", function () {",
+        "    pm.response.to.have.status(200);",
+        "});",
+        "",
+        "pm.test(\"Es el usuario creado\", function () {",
+        "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"usuario_id\")));",
+        "});"
+      ] } }],
+      "request": { "method": "GET", "url": "{{base_url}}/usuarios/{{usuario_id}}" }
+    },
+    {
+      "name": "5. Editar usuario",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 200 OK\", function () {",
+        "    pm.response.to.have.status(200);",
+        "});",
+        "",
+        "pm.test(\"El nombre cambió\", function () {",
+        "    pm.expect(pm.response.json().nombre).to.eql(\"Carlos Pérez Editado\");",
+        "});"
+      ] } }],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n    \"nombre\": \"Carlos Pérez Editado\",\n    \"correo\": \"carlos.editado.{{$timestamp}}@ejemplo.test\"\n}" },
+        "url": "{{base_url}}/usuarios/{{usuario_id}}"
+      }
+    },
+    {
+      "name": "6. Crear con correo repetido (409)",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 409 Conflict\", function () {",
+        "    pm.response.to.have.status(409);",
+        "});",
+        "",
+        "pm.test(\"Explica que el correo ya existe\", function () {",
+        "    pm.expect(pm.response.json().detail).to.eql(\"Ya existe un usuario con ese correo.\");",
+        "});"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n    \"nombre\": \"Otra Laura\",\n    \"correo\": \"laura.gomez@ejemplo.test\"\n}" },
+        "url": "{{base_url}}/usuarios"
+      }
+    },
+    {
+      "name": "7. Crear sin nombre (422)",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 422 Unprocessable Entity\", function () {",
+        "    pm.response.to.have.status(422);",
+        "});"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n    \"correo\": \"sin.nombre@ejemplo.test\"\n}" },
+        "url": "{{base_url}}/usuarios"
+      }
+    },
+    {
+      "name": "8. Borrar usuario",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 204 No Content\", function () {",
+        "    pm.response.to.have.status(204);",
+        "});"
+      ] } }],
+      "request": { "method": "DELETE", "url": "{{base_url}}/usuarios/{{usuario_id}}" }
+    },
+    {
+      "name": "9. Ver usuario borrado (404)",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"Responde 404 Not Found\", function () {",
+        "    pm.response.to.have.status(404);",
+        "});",
+        "",
+        "pm.test(\"Explica que no existe\", function () {",
+        "    pm.expect(pm.response.json().detail).to.eql(\"El usuario no existe.\");",
+        "});"
+      ] } }],
+      "request": { "method": "GET", "url": "{{base_url}}/usuarios/{{usuario_id}}" }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Bloquea el acceso desde el navegador a archivos que empiezan por punto (.env, .gitignore...).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
